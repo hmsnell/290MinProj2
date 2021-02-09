@@ -1,0 +1,54 @@
+---
+title: "Data Cleaning and Analysis"
+author: "Hannah Snell"
+date: "2/9/2021"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 4, fig.align = 'center')
+
+library(tidyverse)
+library(mosaic)
+library(gdata)
+
+# import Qualtrics data 
+
+mp2data <- read_csv("~/Downloads/MP2 Data.csv")
+write_csv(mp2data, "mp2data.csv")
+
+mp2data <- read_csv("mp2data.csv")
+```
+
+# Data Cleaning and Analysis
+
+```{r}
+# data cleaning 
+mp2data <- mp2data[-c(1, 2), ]
+mp2data <- mp2data %>% 
+  select(Finished, ResponseId, Q2, Q3, Q4, Q6, type, sex, climber) %>% 
+  filter( 
+    Finished != FALSE, 
+    Q2 != "No",
+    Q3 != "No, I Do Not Consent" 
+    ) %>% 
+  select(ResponseId, Q4, Q6, type, sex) %>% 
+  mutate(type = tolower(type))
+
+mp2data <- rename.vars(mp2data, from = c("Q4", "Q6", "type", "sex"),
+         to = c("Climber", "Rating", "Type", "Sex"))
+```
+
+```{r}
+# starter plot
+ggplot(mp2data, aes(x = Type, y = Rating, color = Sex)) +
+  geom_point() + 
+  geom_jitter(width = 0.2, height = 0.1) +
+  facet_wrap(~ Climber) +
+  labs(title = "Side-by-Side Boxplot: Can You Hang?", y  = "Overall Competency Rating of Climber") + 
+  theme_bw()
+```
+
+
+
+
