@@ -13,10 +13,6 @@ library(mosaic)
 library(gdata)
 
 # import Qualtrics data 
-
-mp2data <- read_csv("~/Downloads/MP2 Data.csv")
-write_csv(mp2data, "mp2data.csv")
-
 mp2data <- read_csv("mp2data.csv")
 ```
 
