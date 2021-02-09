@@ -1,8 +1,17 @@
 ---
 title: "Data Cleaning and Analysis"
-author: "Hannah Snell"
+author: "Hannah Snell and Vivienne Maxwell"
 date: "2/9/2021"
-output: html_document
+output: 
+  html_document:
+    highlight: tango
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: kable
+    
 ---
 
 ```{r setup, include = FALSE}
@@ -18,7 +27,7 @@ mp2data <- read_csv("mp2data.csv")
 
 # Data Cleaning and Analysis
 
-```{r}
+```{r include=FALSE}
 # data cleaning 
 mp2data <- mp2data[-c(1, 2), ]
 mp2data <- mp2data %>% 
@@ -35,16 +44,68 @@ mp2data <- rename.vars(mp2data, from = c("Q4", "Q6", "type", "sex"),
          to = c("Climber", "Rating", "Type", "Sex"))
 ```
 
-```{r}
+```{r echo=FALSE}
 # starter plot
 ggplot(mp2data, aes(x = Type, y = Rating, color = Sex)) +
   geom_point() + 
   geom_jitter(width = 0.2, height = 0.1) +
   facet_wrap(~ Climber) +
+  labs(title = "Side-by-Side Dotplot: Can You Hang?", y  = "Overall Competency Rating of Climber") + 
+  theme_bw()
+```
+
+```{r echo=FALSE}
+# starter plot
+ggplot(mp2data, aes(x = Type, y = as.numeric(Rating), color = Sex)) +
+  geom_boxplot() + 
+  facet_wrap(~ Climber) +
   labs(title = "Side-by-Side Boxplot: Can You Hang?", y  = "Overall Competency Rating of Climber") + 
   theme_bw()
 ```
 
+```{r}
+#anova data set
+simple_data <- mp2data[-c(1)]
+```
+
+```{r}
+write.csv(simple_data, "simple_data.csv")
+```
+
+**ANOVA Hypothesis** 
+
+$H_0:$ Men are perceived as stronger, regardless of the type of climbing. Therefore, the interaction between type of climbing and sex does not affect a person's perception of a climber's strength. Only the sex of the climber is significant. 
+
+$H_A:$ The interaction between type of climbing and sex does affect a person's perception of a climber's strength. Only looking at sex is not a significant indicator of a climber's perceived strength and ability.
+
+```{r}
+#ANOVA
+ANOVA_test <- lm(Rating ~ Type * Sex, data = simple_data)
+
+anova(ANOVA_test)
+```
+
+After looking at ANOVA output, we see that sex alone (p = 0.9) is not a significant predictor of a climber's perceived strength. In fact, the interaction between type of climbing and sex (p = 0.01) is statistically significant. Therefore, we reject the null hypothesis and conclude that the interaction between type of climbing and sex is statistically significant predictor of a climber's perceived stength and ability. 
+
+#Residual Analysis 
+
+Check conditions on the residuals
+
+```{r}
+hist(ANOVA_test$residuals)
+```
+The histogram of the residuals appears to follow a slightly normal distribution and for the sake of this exercise we will assume the condition of normality is met. 
+
+```{r}
+qqnorm(ANOVA_test$residuals)
+```
+The normal Q-Q Plot appears to be relatively linear, so we will assume the condition of normality has been met. 
 
 
+#Equal Variance
 
+```{r}
+favstats(Rating ~ Sex|Type, data = simple_data)
+```
+
+The largest standard deviation (SD=0.94) is not three times larger than the smallest standard deviation (SD=0.71). Therefore Fisher's S assumption is met. 
