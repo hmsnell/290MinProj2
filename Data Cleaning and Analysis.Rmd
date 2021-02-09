@@ -18,7 +18,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 4, fig.align = 'center')
 
 library(tidyverse)
-library(mosaic)
+library(gridExtra)
 library(gdata)
 
 # import Qualtrics data 
@@ -38,7 +38,8 @@ mp2data <- mp2data %>%
     Q3 != "No, I Do Not Consent" 
     ) %>% 
   select(ResponseId, Q4, Q6, type, sex) %>% 
-  mutate(type = tolower(type))
+  mutate(type = tolower(type)) %>% 
+  mutate(Q6 = as.numeric(Q6))
 
 mp2data <- rename.vars(mp2data, from = c("Q4", "Q6", "type", "sex"),
          to = c("Climber", "Rating", "Type", "Sex"))
@@ -64,32 +65,28 @@ ggplot(mp2data, aes(x = Type, y = as.numeric(Rating), color = Sex)) +
 ```
 
 ```{r}
-#anova data set
+# anova data set
 simple_data <- mp2data[-c(1)]
-```
-
-```{r}
-write.csv(simple_data, "simple_data.csv")
+write_csv(simple_data, "simple_data.csv")
 ```
 
 **ANOVA Hypothesis** 
 
-$H_0:$ Men are perceived as stronger, regardless of the type of climbing. Therefore, the interaction between type of climbing and sex does not affect a person's perception of a climber's strength. Only the sex of the climber is significant. 
+$H_0:$ Men are perceived as physically stronger, regardless of the type of climbing. Therefore, the interaction between type of climbing (either bouldering or top roping) and sex does not affect a person's perception of a climber's strength. Only the sex of the climber is significant. 
 
 $H_A:$ The interaction between type of climbing and sex does affect a person's perception of a climber's strength. Only looking at sex is not a significant indicator of a climber's perceived strength and ability.
 
 ```{r}
 #ANOVA
 ANOVA_test <- lm(Rating ~ Type * Sex, data = simple_data)
-
 anova(ANOVA_test)
 ```
 
 After looking at ANOVA output, we see that sex alone (p = 0.9) is not a significant predictor of a climber's perceived strength. In fact, the interaction between type of climbing and sex (p = 0.01) is statistically significant. Therefore, we reject the null hypothesis and conclude that the interaction between type of climbing and sex is statistically significant predictor of a climber's perceived stength and ability. 
 
-#Residual Analysis 
+# Residual Analysis 
 
-Check conditions on the residuals
+_Check conditions on the residuals._
 
 ```{r}
 hist(ANOVA_test$residuals)
@@ -102,10 +99,33 @@ qqnorm(ANOVA_test$residuals)
 The normal Q-Q Plot appears to be relatively linear, so we will assume the condition of normality has been met. 
 
 
-#Equal Variance
+# Equal Variance
 
-```{r}
+```{r, message = F}
 favstats(Rating ~ Sex|Type, data = simple_data)
 ```
 
-The largest standard deviation (SD=0.94) is not three times larger than the smallest standard deviation (SD=0.71). Therefore Fisher's S assumption is met. 
+The largest standard deviation (SD = 0.94) is not three times larger than the smallest standard deviation (SD = 0.71). Therefore Fisher's S assumption is met. 
+
+# Assessing Third Factor: Prior Knowledge of Climbing
+
+$H_0:$: The factor of prior knowledge of the sport of climbing will not have a statistically significant effect on the perceived strength of climbers of different sexes and on different types of climbs.  
+
+$H_A:$ The factor of prior knowledge of the sport of climbing will have a statistically significant effect on the perceived strength of climbers of different sexes and on different types of climbs.  
+
+```{r}
+# second ANOVA 
+mod2 <- lm(Rating ~ Type * Sex * Climber, data = simple_data)
+anova(mod2)
+```
+
+H_0 remains
+
+```{r}
+hist(mod2$residuals)
+qqnorm(mod2$residuals)
+```
+
+Plots look decent
+
+*How to calculate favstats on this model? 
