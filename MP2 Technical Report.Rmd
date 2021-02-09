@@ -1,0 +1,150 @@
+---
+title: "Can you Hang? A study on the perceived strength of rock climbers"
+author: "Vivienne Maxwell and Hannah Snell"
+date: "2/9/2021"
+output: 
+  html_document:
+    highlight: tango
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: kable
+---
+
+# I. Introduction 
+
+Rock climbing is a popular predominately male-dominated sport. Enter any rock climbing gym and you're sure to encounter swarms of "boulder bros" who are often harmless but can appear intimidating. Recently, the sport has tried to be more inclusive of non-male genders. You may have noticed your local climbing gym offer "women only" climbing nights in an attempt to foster a less intimidating environment. But even as more women join this sport, are men and women perceived as equals? As two climber chicks, our aim of this experiment was to study people's perceptions of rock climber's strength. Our main question is whether men and women are perceived as equally strong and capable of "sending a climbing route"? 
+
+There are a few different types of rock climbing but we decided to focus on the two most accessible types: top roping and bouldering. Bouldering involves climbing shorter routes without being attached to a rope. Once a climber has bouldered to the top of the route, they typically jump to the ground. Bouldering requires more strength but less endurance, as the routes are shorter. 
+
+Top roping is where the climber is tied into a rope, which is anchored at the top of the route. The climber will then climb to the top. If the climber falls, the rope will catch them. This type of climbing requires a lot more endurance, as the routes are longer. 
+
+In order to test this question of climber's perceived strength, we decided to focus on three factors with two levels each: 
+
+* Sex (Male and Female) 
+
+* Type of rock climbing (Bouldering and Top Rope)
+
+* Is the participant a climber or have knowledge of the sport? (Yes or no)
+
+Our hypothesis was that overall, men would be perceived as the strongest regardless of whether they were bouldering or top roping. 
+
+# II. Methods 
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#loading packages
+library (png)
+library (knitr)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(mosaic)
+library(tidyr)
+```
+
+In order to study rock climber's perceived strength and ability, a Randomized Basic Factorial (RBF[3]) study was designed. A survey using Qualtrics was created in which each factor (sex, and type of climbing) was crossed. An image depicting one of the following four conditions (male boulderer, male top roper, female boulderer, and female top roper) was randomly assigned to a participant. The participant was then asked to rate their perception of the climber's strength and ability. They were also asked whether they themselves were a climber of whether they had any knowledge of the sport. 
+
+While each participant was randomly assigned one of the four pictures, all participants had the same follow-up questions.
+
+## Mock Survey
+
+One of the following conditions was randomly assigned to a participant. All of the participants were then asked to rank their perception. 
+
+![Fig.1: Image of a male boulderer](male-boulder.png) 
+
+![Fig.2: Image of a female boulderer](boulder-female.png) 
+
+![Fig.3: Image of a male top roper](male-tr.png) 
+
+![Fig.4: Image of a female top roper](female-tr.png) 
+
+![Fig. 5: Screenshot of how participants were asked to rank their perception](survey.png) 
+
+# III. Results 
+
+```{r include=FALSE}
+# import Qualtrics data 
+mp2clean <- read_csv("mp2clean.csv")
+simple_data <- read_csv("simple_data.csv")
+```
+
+```{r echo=FALSE}
+#Boxplot 
+ggplot(mp2clean, aes(x = Type, y = as.numeric(Rating), color = Sex)) +
+  geom_boxplot() + 
+  facet_wrap(~ Climber) +
+  labs(title = "Side-by-Side Boxplot: Can You Hang?", y  = "Overall Competency Rating of Climber") + 
+  theme_bw()
+```
+
+This boxplot depicts the perceived strength of a climber based on the sex of the climber and what kind of climbing was portrayed in the photo. 
+
+The results are divided into two groups: 
+
+* YES: Climbers. The participants who identify as a climber and/or have prior knowledge of the sport 
+
+* NO: non-climbers, those who don't have any knowledge of the sport. 
+
+**Interpretation:** At first glance it looks like male boulderers are perceived as stronger, more competent climbers. The participants who identify as climbers tended to perceive the climbers in the photo as more competent overall. The data for the non-climber participants appears to have a larger spread. It is important to note the two outliers for the male and female top ropers in the participant climber group. 
+
+In order to determine whether these trends are statistically significant, we must conduct an Analysis of Variance test (ANOVA). 
+
+## ANOVA 
+
+After checking the Fisher Assumptions (see appendix) to ensure our data is good enough for further statistical analyses, an analysis of variance test (ANOVA) was conducted. 
+
+**ANOVA Hypothesis** 
+
+$H_0:$ Men are perceived as stronger, regardless of the type of climbing. Therefore, the interaction between type of climbing and sex does not affect a person's perception of a climber's strength. Only the sex of the climber is significant. 
+
+$H_A:$ The interaction between type of climbing and sex does affect a person's perception of a climber's strength. Only looking at sex is not a significant indicator of a climber's perceived strength and ability.
+
+```{r echo=FALSE}
+#ANOVA
+ANOVA_test <- lm(Rating ~ Type * Sex, data = simple_data)
+
+anova(ANOVA_test)
+```
+
+After looking at ANOVA output, we see that sex alone (p = 0.9) is not a significant predictor of a climber's perceived strength. In fact, the interaction between type of climbing and sex (p = 0.01) is statistically significant. Therefore, we reject the null hypothesis and conclude that the interaction between type of climbing and sex is statistically significant predictor of a climber's perceived strength and ability. 
+
+# IV. Conclusion 
+
+The aim of this Randomized Basic Factorial 3 experiment was to study the perceived strength and competence of climbers. The four images were selected to test whether sex and the type of climbing impacts people's perceptions of how strong climbers are. 
+
+After analyzing and visualizing the data, some interesting trends were made apparent. It appears that overall, male boulderers are perceived as stronger. In general, participants who identified as climbers tended to perceive the climbers in the photos are more competent than the participants who didn't identify as climbers. 
+
+The ANOVA results tell us that the sex of a climber or the type of climb performed is not a statistically significant predictor of perceived strength. Rather, it is the interaction between the climber's sex and the type of climb that statistically impacts the perceived competence of that climber. 
+
+## Limitations 
+
+Overall, there were several limitations to this study. There were only 76 survey responses, which is not a large sample size—the ideal sample size is n=100. The sampled individuals were not completely random; the majority of participants were students of the SDS 290 course as well as personal acquaintances. The survey was anonymous so there is no information regarding the participants' race or ethnicity. In future studies that would be something to consider taking into account, as rock climbing (just like so many outdoor sports) is not as accessible to minorities. 
+
+# V. Appendix 
+
+## Fisher Assumptions 
+
+### Residual Analysis 
+
+Check conditions on the residuals
+
+```{r echo=FALSE}
+hist(ANOVA_test$residuals)
+```
+
+The histogram of the residuals appears to follow a slightly normal distribution and for the sake of this exercise we will assume the condition of normality is met. 
+
+```{r echo=FALSE}
+qqnorm(ANOVA_test$residuals)
+```
+
+The normal Q-Q Plot appears to be relatively linear, so we will assume the condition of normality has been met. 
+
+### Equal Variance
+
+```{r echo=FALSE}
+favstats(Rating ~ Sex|Type, data = simple_data)
+```
+The largest standard deviation (SD=0.94) is not three times larger than the smallest standard deviation (SD=0.71). Therefore Fisher's S assumption is met. 
