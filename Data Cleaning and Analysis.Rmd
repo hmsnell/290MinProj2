@@ -20,6 +20,9 @@ knitr::opts_chunk$set(echo = TRUE, fig.width = 5, fig.height = 4, fig.align = 'c
 library(tidyverse)
 library(gridExtra)
 library(gdata)
+library(pander)
+library(mosaic)
+library(kableExtra)
 
 # import Qualtrics data 
 mp2data <- read_csv("mp2data.csv")
@@ -80,6 +83,8 @@ $H_A:$ The interaction between type of climbing and sex does affect a person's p
 #ANOVA
 ANOVA_test <- lm(Rating ~ Type * Sex, data = simple_data)
 anova(ANOVA_test)
+
+pander(anova(ANOVA_test))
 ```
 
 After looking at ANOVA output, we see that sex alone (p = 0.9) is not a significant predictor of a climber's perceived strength. In fact, the interaction between type of climbing and sex (p = 0.01) is statistically significant. Therefore, we reject the null hypothesis and conclude that the interaction between type of climbing and sex is statistically significant predictor of a climber's perceived stength and ability. 
@@ -117,6 +122,8 @@ $H_A:$ The factor of prior knowledge of the sport of climbing will have a statis
 # second ANOVA 
 mod2 <- lm(Rating ~ Type * Sex * Climber, data = simple_data)
 anova(mod2)
+
+pander(anova(mod2))
 ```
 
 H_0 remains
@@ -128,4 +135,15 @@ qqnorm(mod2$residuals)
 
 Plots look decent
 
-*How to calculate favstats on this model? 
+*How to calculate favstats on this model? Use manual SD calculations instead
+
+```{r}
+simple_data %>% 
+  group_by(Type, Sex, Climber) %>% 
+  summarise(
+    sd = sd(Rating)
+  )
+
+```
+
+
